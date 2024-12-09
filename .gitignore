@@ -1,0 +1,62 @@
+# Ignore OS generated files
+.DS_Store
+Thumbs.db
+
+# Ignore build directories
+/build/
+out/
+dist/
+*.o
+*.obj
+*.exe
+*.log
+*.so
+*.dll
+*.dylib
+*.class
+
+# CMake build files
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# IDE-specific files
+.idea/
+.vscode/
+*.iml
+
+# Backup and temporary files
+*.bak
+*.swp
+*.tmp
+*.old
+
+# Inputs and Outputs
+inputs/*.tmp
+outputs/*.tmp
+
+# Ignore compiled libraries
+*.a
+*.lib
+
+# Ignore other binary files
+*.bin
+*.elf
+*.map
+
+# Logs and reports
+*.log
+*.pid
+*.csv
+*.json
+
+# Ignore coverage reports
+*.gcno
+*.gcda
+*.gcov
+
+# Ignore Python/node.js related files
+*.pyc
+node_modules/
+.env
