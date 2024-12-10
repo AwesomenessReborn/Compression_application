@@ -7,6 +7,7 @@
 #include "Compressor.h"
 #include "HuffmanCompressor.h"
 #include "LZWCompressor.h"
+#include "DefaultCompressor.h"
 
 int main(int argc, char* argv[]) {
     // ---- BEGIN ARGUMENT PROCESSING ----
@@ -39,6 +40,10 @@ int main(int argc, char* argv[]) {
             case '2':
                 compressorDeque.push_back(std::make_unique<LZWCompressor>());
                 break;
+
+            case '3': 
+                compressorDeque.push_back(std::make_unique<DefaultCompressor>()); 
+                break; 
             // Add more cases for additional algorithms
             default:
                 std::cerr << "Error: Invalid encoding order character '" << c << "'." << std::endl;
