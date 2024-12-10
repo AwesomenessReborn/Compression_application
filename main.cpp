@@ -57,7 +57,7 @@ int main(int argc, char* argv[]) {
         double compressionTime = std::chrono::duration<double, std::milli>(end - start).count();
 
         std::cout << "Compression with " << typeid(*compressor).name() 
-                  << " took " << compressionTime << " ms" << std::endl;
+                  << " took " << compressionTime << " ms\n" << std::endl;
 
         totalCompressionTime += compressionTime;
     }
@@ -90,13 +90,21 @@ int main(int argc, char* argv[]) {
     std::cout << "Compression Ratio: " << compressionRatio << std::endl;
 
     // Write output to the "outputs" folder
-    std::ofstream output("outputs/output.txt", std::ios::binary);
-    if (!output) {
-        std::cerr << "Error: Cannot open output file." << std::endl;
+    std::ofstream output_compressed("outputs/output_compressed.txt", std::ios::binary);
+    std::ofstream output_back_to_original("outputs/output_back_to_original.txt", std::ios::binary); 
+    if (!output_compressed) {
+        std::cerr << "Error: Cannot open compressed output file." << std::endl;
         return 1;
     }
-    output << compressedData;
-    output.close();
+    if (!output_back_to_original) {
+        std::cerr << "Error: Cannot open back_to_original output file." << std::endl;
+        return 1;
+    }
+    output_compressed << compressedData;
+    output_compressed.close();
+
+    output_back_to_original << decompressedData; 
+    output_back_to_original.close(); 
 
     return 0;
 }

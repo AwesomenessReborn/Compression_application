@@ -17,15 +17,19 @@ private:
     int frequency;
 
 public:
-    // Constructor for internal nodes
     HuffmanTreeNode(HuffmanTreeNode *leftChildNode, HuffmanTreeNode *rightChildNode)
         : leftChild(leftChildNode), rightChild(rightChildNode), character('\0'),
           frequency(leftChild->GetFrequency() + rightChild->GetFrequency()) {}
 
-    // Constructor for leaf nodes
     HuffmanTreeNode(char leafCharacter, int leafFrequency)
         : leftChild(nullptr), rightChild(nullptr), character(leafCharacter),
           frequency(leafFrequency) {}
+
+    ~HuffmanTreeNode()
+    {
+        delete leftChild;
+        delete rightChild;
+    }
 
     char GetCharacter() const { return character; }
 
@@ -51,7 +55,6 @@ private:
     std::unordered_map<char, std::string> codes;
     HuffmanTreeNode *root;
 
-    // Helper function to build a frequency table
     std::unordered_map<char, int> BuildFrequencyTable(const std::string &input)
     {
         std::unordered_map<char, int> table;
@@ -62,7 +65,6 @@ private:
         return table;
     }
 
-    // Helper function to build the Huffman tree
     HuffmanTreeNode *BuildTree(const std::unordered_map<char, int> &frequencyTable)
     {
         std::priority_queue<HuffmanTreeNode *, std::vector<HuffmanTreeNode *>, HuffmanNodeFrequencyComparer> nodes;
@@ -84,7 +86,6 @@ private:
         return nodes.top();
     }
 
-    // Helper function to generate codes from the tree
     void GenerateCodes(HuffmanTreeNode *node, const std::string &prefix)
     {
         if (!node->GetLeftChild() && !node->GetRightChild())
@@ -104,22 +105,17 @@ public:
 
     ~HuffmanCompressor()
     {
-        // Clean up tree memory (if necessary)
-        // Note: Implement a recursive delete function if needed.
+        delete root;  
     }
 
-    // Override encode method
     std::string encode(const std::string &input) override
     {
-        // Build frequency table and tree
         auto frequencyTable = BuildFrequencyTable(input);
         root = BuildTree(frequencyTable);
 
-        // Generate codes from the tree
         codes.clear();
         GenerateCodes(root, "");
 
-        // Encode input string
         std::string encodedString;
         for (char c : input)
         {
@@ -129,7 +125,6 @@ public:
         return encodedString;
     }
 
-    // Override decode method
     std::string decode(const std::string &input) override
     {
         if (!root)
