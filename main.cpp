@@ -10,6 +10,7 @@
 
 int main(int argc, char* argv[]) {
     // ---- BEGIN ARGUEMENT PROCESSING ----
+    std::cout << std::endl; 
     if (argc != 3) {
         std::cerr << "Usage: " << argv[0] << " <input_file> <encoding_order>" << std::endl;
         return 1;
@@ -56,13 +57,13 @@ int main(int argc, char* argv[]) {
 
         double compressionTime = std::chrono::duration<double, std::milli>(end - start).count();
 
-        std::cout << "Compression with " << typeid(*compressor).name() 
-                  << " took " << compressionTime << " ms\n" << std::endl;
+        std::cout << "\tCompression with " << typeid(*compressor).name() 
+                  << " took " << compressionTime << " ms" << std::endl;
 
         totalCompressionTime += compressionTime;
     }
 
-    std::cout << "Total Compression Time: " << totalCompressionTime << " ms" << std::endl;
+    std::cout << "Total Compression Time: " << totalCompressionTime << " ms\n" << std::endl;
 
     // Perform decompression in reverse order using the same deque
     std::string decompressedData = compressedData;
@@ -77,17 +78,17 @@ int main(int argc, char* argv[]) {
         double decompressionTime = std::chrono::duration<double, std::milli>(end - start).count();
         totalDecompressionTime += decompressionTime;
 
-        std::cout << "Decompression with " << typeid(*compressor).name() 
+        std::cout << "\tDecompression with " << typeid(*compressor).name() 
                   << " took " << decompressionTime << " ms" << std::endl;
 
         compressorDeque.pop_back(); // Remove the last compressor
     }
 
-    std::cout << "Total Decompression Time: " << totalDecompressionTime << " ms" << std::endl;
+    std::cout << "Total Decompression Time: " << totalDecompressionTime << " ms\n" << std::endl;
 
     // Calculate and output the compression ratio
     double compressionRatio = static_cast<double>(compressedData.size()) / data.size();
-    std::cout << "Compression Ratio: " << compressionRatio << std::endl;
+    std::cout << "\n-----\nCompression Ratio: " << compressionRatio << "\n-----" << std::endl;
 
     // Write output to the "outputs" folder
     std::ofstream output_compressed("outputs/output_compressed.txt", std::ios::binary);

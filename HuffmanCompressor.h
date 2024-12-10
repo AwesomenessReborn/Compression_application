@@ -164,8 +164,6 @@ public:
             }
         }
 
-        std::cout << "Binary Decoded String: " << binaryString << std::endl;
-
         std::string decodedString;
         HuffmanTreeNode *current = root;
 
