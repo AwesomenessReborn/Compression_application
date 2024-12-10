@@ -9,7 +9,7 @@
 #include "LZWCompressor.h"
 
 int main(int argc, char* argv[]) {
-    // ---- BEGIN ARGUEMENT PROCESSING ----
+    // ---- BEGIN ARGUMENT PROCESSING ----
     std::cout << std::endl; 
     if (argc != 3) {
         std::cerr << "Usage: " << argv[0] << " <input_file> <encoding_order>" << std::endl;
@@ -26,9 +26,9 @@ int main(int argc, char* argv[]) {
     }
     std::string data((std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());
     input.close();
-    // ---- END ARGUEMENT PROCESSING ----
+    // ---- END ARGUMENT PROCESSING ----
 
-    // double ended queue to hold compressors based on encoding order
+    // Double-ended queue to hold compressors based on encoding order
     std::deque<std::unique_ptr<Compressor>> compressorDeque;
 
     for (char c : encodingOrder) {
@@ -47,12 +47,12 @@ int main(int argc, char* argv[]) {
     }
 
     // Perform compression
-    std::string compressedData = data;
+    std::vector<uint8_t> compressedData(data.begin(), data.end());
     double totalCompressionTime = 0.0;
 
     for (auto& compressor : compressorDeque) {
         auto start = std::chrono::high_resolution_clock::now();
-        compressedData = compressor->encode(compressedData);
+        compressedData = compressor->encode(std::string(compressedData.begin(), compressedData.end()));
         auto end = std::chrono::high_resolution_clock::now();
 
         double compressionTime = std::chrono::duration<double, std::milli>(end - start).count();
@@ -66,20 +66,26 @@ int main(int argc, char* argv[]) {
     std::cout << "Total Compression Time: " << totalCompressionTime << " ms\n" << std::endl;
 
     // Perform decompression in reverse order using the same deque
-    std::string decompressedData = compressedData;
+    std::vector<uint8_t> decompressedData = compressedData;
     double totalDecompressionTime = 0.0;
 
     while (!compressorDeque.empty()) {
         auto& compressor = compressorDeque.back(); // Access the last compressor
         auto start = std::chrono::high_resolution_clock::now();
-        decompressedData = compressor->decode(decompressedData);
-        auto end = std::chrono::high_resolution_clock::now();
 
+        // Convert intermediate decompressed data (vector<uint8_t>) back to string for decode()
+        std::string intermediateData(decompressedData.begin(), decompressedData.end());
+        std::string decodedString = compressor->decode(decompressedData);
+
+        // Convert the decoded string back to vector<uint8_t> for further processing
+        decompressedData = std::vector<uint8_t>(decodedString.begin(), decodedString.end());
+
+        auto end = std::chrono::high_resolution_clock::now();
         double decompressionTime = std::chrono::duration<double, std::milli>(end - start).count();
         totalDecompressionTime += decompressionTime;
 
         std::cout << "\tDecompression with " << typeid(*compressor).name() 
-                  << " took " << decompressionTime << " ms" << std::endl;
+                << " took " << decompressionTime << " ms" << std::endl;
 
         compressorDeque.pop_back(); // Remove the last compressor
     }
@@ -91,8 +97,8 @@ int main(int argc, char* argv[]) {
     std::cout << "\n-----\nCompression Ratio: " << compressionRatio << "\n-----" << std::endl;
 
     // Write output to the "outputs" folder
-    std::ofstream output_compressed("outputs/output_compressed.txt", std::ios::binary);
-    std::ofstream output_back_to_original("outputs/output_back_to_original.txt", std::ios::binary); 
+    std::ofstream output_compressed("outputs/output_compressed.bin", std::ios::binary);
+    std::ofstream output_back_to_original("outputs/output_back_to_original.txt", std::ios_base::binary); 
     if (!output_compressed) {
         std::cerr << "Error: Cannot open compressed output file." << std::endl;
         return 1;
@@ -101,10 +107,11 @@ int main(int argc, char* argv[]) {
         std::cerr << "Error: Cannot open back_to_original output file." << std::endl;
         return 1;
     }
-    output_compressed << compressedData;
+    
+    output_compressed.write(reinterpret_cast<const char*>(compressedData.data()), compressedData.size());
     output_compressed.close();
 
-    output_back_to_original << decompressedData; 
+    output_back_to_original.write(reinterpret_cast<const char*>(decompressedData.data()), decompressedData.size()); 
     output_back_to_original.close(); 
 
     return 0;
