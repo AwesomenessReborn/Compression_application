@@ -7,6 +7,8 @@
 #include <queue>
 #include <vector>
 #include <stdexcept>
+#include <ostream>
+#include <iostream>
 
 class HuffmanTreeNode
 {
@@ -105,7 +107,7 @@ public:
 
     ~HuffmanCompressor()
     {
-        delete root;  
+        delete root;
     }
 
     std::string encode(const std::string &input) override
@@ -116,29 +118,59 @@ public:
         codes.clear();
         GenerateCodes(root, "");
 
-        std::string encodedString;
+        std::string binaryString;
         for (char c : input)
         {
-            encodedString += codes[c];
+            binaryString += codes[c];
+        }
+
+        std::string encodedString;
+        uint8_t currentByte = 0;
+        int bitCount = 0;
+
+        for (char bit : binaryString)
+        {
+            currentByte = (currentByte << 1) | (bit - '0');
+            bitCount++;
+
+            if (bitCount == 8)
+            {
+                encodedString += static_cast<char>(currentByte);
+                currentByte = 0;
+                bitCount = 0;
+            }
+        }
+
+        if (bitCount > 0)
+        {
+            currentByte <<= (8 - bitCount);
+            encodedString += static_cast<char>(currentByte);
         }
 
         return encodedString;
     }
 
-    std::string decode(const std::string &input) override
-    {
+    std::string decode(const std::string &encodedString) override {
         if (!root)
             throw std::runtime_error("Decoding requires a valid Huffman tree.");
+
+        std::string binaryString;
+
+        for (char c : encodedString) {
+            uint8_t byte = static_cast<uint8_t>(c);
+            for (int i = 7; i >= 0; --i) 
+            {
+                binaryString += ((byte >> i) & 1) ? '1' : '0';
+            }
+        }
+
+        std::cout << "Binary Decoded String: " << binaryString << std::endl;
 
         std::string decodedString;
         HuffmanTreeNode *current = root;
 
-        for (char bit : input)
-        {
-            if (bit == '0')
-                current = current->GetLeftChild();
-            else if (bit == '1')
-                current = current->GetRightChild();
+        for (char bit : binaryString) {
+            current = (bit == '0') ? current->GetLeftChild() : current->GetRightChild();
 
             if (!current->GetLeftChild() && !current->GetRightChild())
             {
